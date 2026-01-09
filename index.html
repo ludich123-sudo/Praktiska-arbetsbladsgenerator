@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbetsblad - Skapa utskriftsvänliga matematikpapper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js?v=3" async></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      svg: { fontCache: 'global' },
+      startup: { typeset: false }
+    };
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #1a1a1a; 
+            min-height: 100vh;
+            color: white;
+        }
+        
+        /* Custom colors inspired by Praktiska */
+        :root {
+            --primary-orange: #e65c00;
+            --primary-orange-light: #ff7a1a;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --card-border: #3a3a3a;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-bottom: 1px solid #333;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+        }
+
+        /* Path buttons */
+        .path-btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            background: #333;
+            color: #999;
+        }
+        .path-btn.active { 
+            background: var(--primary-orange); 
+            color: white; 
+            border-color: var(--primary-orange-light);
+        }
+        .path-btn:not(.active):hover { 
+            background: #444;
+            color: white;
+        }
+
+        /* Select styling */
+        select {
+            background-color: #333;
+            border: 1px solid #444;
+            color: white;
+            font-size: 14px;
+        }
+        select:focus {
+            border-color: var(--primary-orange);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(230, 92, 0, 0.2);
+        }
+
+        /* Input styling */
+        input[type="text"] {
+            background-color: #333;
+            border: 1px solid #444;
+            color: white;
+        }
+        input[type="text"]:focus {
+            border-color: var(--primary-orange);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(230, 92, 0, 0.2);
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            accent-color: var(--primary-orange);
+        }
+
+        /* Task items */
+        .task-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2a2a2a;
+        }
+        .task-item:hover {
+            border-color: var(--primary-orange);
+            background: #333;
+        }
+        .task-item.selected {
+            border-color: var(--primary-orange);
+            background: rgba(230, 92, 0, 0.1);
+        }
+        .task-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .task-preview {
+            flex: 1;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-orange);
+            color: white;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            background: var(--primary-orange-light);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #333;
+            color: white;
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        /* Worksheet styles */
+        .worksheet-page {
+            background: white;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 20mm;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+            color: #1a1a1a;
+        }
+        .worksheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #e65c00;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .worksheet-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+        .worksheet-name-date {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+        .worksheet-name-date label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .worksheet-name-date .line {
+            border-bottom: 1px solid #333;
+            width: 120px;
+            display: inline-block;
+        }
+        .worksheet-task {
+            margin-bottom: 24px;
+            page-break-inside: avoid;
+        }
+        .worksheet-task-number {
+            font-weight: bold;
+            color: #e65c00;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .worksheet-task-content {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #1f2937;
+        }
+        .worksheet-task-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        .worksheet-answer-line {
+            margin-top: 12px;
+            border-bottom: 1px solid #666;
+            height: 24px;
+        }
+        .worksheet-answer-box {
+            margin-top: 12px;
+            border: 1px solid #666;
+            height: 40px;
+            border-radius: 4px;
+        }
+        .worksheet-scaffolding {
+            background: #fff7ed;
+            border-left: 3px solid #e65c00;
+            padding: 8px 12px;
+            margin-top: 10px;
+            border-radius: 0 4px 4px 0;
+        }
+        .worksheet-scaffolding-title {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #9a3412;
+            margin-bottom: 4px;
+        }
+        .worksheet-scaffolding-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .worksheet-scaffolding-item {
+            font-size: 0.75rem;
+            color: #7c2d12;
+            line-height: 1.4;
+        }
+        .worksheet-answer-key {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+        .worksheet-answer-key-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #16a34a;
+        }
+        .worksheet-answer-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+        }
+        .worksheet-answer-item {
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+        .worksheet-answer-item strong {
+            color: #e65c00;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        /* Print styles - removes browser headers/footers */
+        @media print {
+            @page {
+                margin: 15mm;
+                size: A4;
+            }
+            html {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            body > *:not(#worksheetPrintArea) {
+                display: none !important;
+            }
+            #worksheetPrintArea {
+                display: block !important;
+            }
+            .worksheet-page {
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                page-break-after: always;
+            }
+            .worksheet-page:last-child {
+                page-break-after: auto;
+            }
+            .worksheet-task {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #666; }
+
+        /* Status badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .status-badge.connecting {
+            background: #3b3b00;
+            color: #fbbf24;
+        }
+        .status-badge.connected {
+            background: #052e16;
+            color: #4ade80;
+        }
+        .status-badge.error {
+            background: #450a0a;
+            color: #f87171;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header py-4 px-6 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">📄</span>
+                <div>
+                    <h1 class="text-xl font-bold text-white">Arbetsblad</h1>
+                    <p class="text-xs text-gray-400">Skapa utskriftsvänliga matematikpapper</p>
+                </div>
+            </div>
+            <div id="firebaseStatus" class="status-badge connecting">
+                <span class="status-dot bg-yellow-400"></span>
+                <span>Ansluter...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left: Task Selection -->
+            <div class="lg:col-span-2 space-y-4">
+                
+                <!-- Source Selection Card -->
+                <div class="card p-5">
+                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Välj källa</h2>
+                    
+                    <!-- Path buttons -->
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <button id="pathCampaigns" class="path-btn active" onclick="setCollection('campaigns')">
+                            🚀 Kapitelträning
+                        </button>
+                        <button id="pathMathTasks" class="path-btn" onclick="setCollection('math_tasks')">
+                            🎯 Typuppgifter NP
+                        </button>
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Ämne</label>
+                            <select id="topicSelect" class="w-full p-3 rounded-lg" onchange="populateChapters(); loadTasks();">
+                            </select>
+                        </div>
+                        <div id="levelSelectContainer">
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Årskurs</label>
+                            <select id="levelSelect" class="w-full p-3 rounded-lg" onchange="loadTasks();">
+                                <option value="ma1" selected>Ma 1</option>
+                                <option value="grund">Matematik Grund</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Del</label>
+                            <select id="chapterSelect" class="w-full p-3 rounded-lg" onchange="loadTasks();">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Task List Card -->
+                <div class="card">
+                    <div class="flex items-center justify-between p-4 border-b border-[#3a3a3a]">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="selectAllTasks" class="w-5 h-5 rounded" onchange="toggleAllTasks()">
+                            <label for="selectAllTasks" class="font-semibold text-white cursor-pointer">Välj alla</label>
+                        </div>
+                        <div id="selectedCount" class="text-sm font-medium" style="color: var(--primary-orange);">0 uppgifter valda</div>
+                    </div>
+                    <div id="taskList" class="max-h-[450px] overflow-y-auto p-4 space-y-2">
+                        <p class="text-gray-500 text-center py-8">Laddar uppgifter...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Settings -->
+            <div class="space-y-4">
+                
+                <!-- Settings Card -->
+                <div class="card p-5">
+                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Inställningar</h2>
+                    
+                    <!-- Title -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Titel på arbetsbladet</label>
+                        <input type="text" id="worksheetTitle" class="w-full p-3 rounded-lg" placeholder="t.ex. Algebra övning 1">
+                    </div>
+
+                    <!-- Tasks per page -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Uppgifter per sida</label>
+                        <select id="tasksPerPage" class="w-full p-3 rounded-lg">
+                            <option value="4">4 uppgifter (stor storlek)</option>
+                            <option value="6" selected>6 uppgifter (medium)</option>
+                            <option value="8">8 uppgifter (kompakt)</option>
+                            <option value="10">10 uppgifter (liten storlek)</option>
+                        </select>
+                    </div>
+
+                    <!-- Answer space -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Svarsplats</label>
+                        <select id="answerSpace" class="w-full p-3 rounded-lg">
+                            <option value="line">Linje för svar</option>
+                            <option value="box">Ruta för svar</option>
+                            <option value="none">Ingen svarsplats</option>
+                        </select>
+                    </div>
+
+                    <!-- Checkboxes -->
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="includeAnswerKey" class="w-4 h-4 rounded" checked>
+                            <span class="text-sm text-gray-300 group-hover:text-white transition">Inkludera facit</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="answerKeyOnBack" class="w-4 h-4 rounded">
+                            <span class="text-sm text-gray-300 group-hover:text-white transition">Facit på separat sida</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="includeScaffolding" class="w-4 h-4 rounded">
+                            <span class="text-sm text-gray-300 group-hover:text-white transition">Inkludera tips</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="shuffleTasks" class="w-4 h-4 rounded">
+                            <span class="text-sm text-gray-300 group-hover:text-white transition">Slumpa ordning</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" id="includeNameDate" class="w-4 h-4 rounded" checked>
+                            <span class="text-sm text-gray-300 group-hover:text-white transition">Namn- och datumfält</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="generateWorksheet()" class="btn-primary w-full">
+                        👁️ Förhandsgranska
+                    </button>
+                    <button onclick="printWorksheet()" class="btn-secondary w-full">
+                        🖨️ Skriv ut / Ladda ner PDF
+                    </button>
+                    <p class="text-xs text-gray-500 text-center leading-relaxed">
+                        💡 <strong>Tips:</strong> I utskriftsdialogen, klicka på "Fler inställningar" och avmarkera "Sidhuvud och sidfot" för att ta bort datum/URL.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Preview Modal -->
+    <div id="worksheetModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="modal-overlay fixed inset-0" onclick="closeModal()"></div>
+        <div class="relative max-w-4xl mx-auto my-8">
+            <div class="bg-[#2a2a2a] rounded-t-xl p-4 flex items-center justify-between sticky top-0 z-10 border-b border-[#3a3a3a]">
+                <h3 class="font-bold text-white">📄 Förhandsvisning</h3>
+                <div class="flex gap-3">
+                    <button onclick="printWorksheet()" class="btn-primary py-2 px-4 text-sm">
+                        🖨️ Skriv ut / PDF
+                    </button>
+                    <button onclick="closeModal()" class="btn-secondary py-2 px-4 text-sm">
+                        ✕ Stäng
+                    </button>
+                </div>
+            </div>
+            <div id="worksheetPreviewContent" class="bg-gray-100 p-6">
+                <!-- Worksheet pages rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9wbtUB4MUFq1BF00upHxIS6DQK9aS0vQ",
+            authDomain: "praktiska-np.firebaseapp.com",
+            projectId: "praktiska-np",
+            storageBucket: "praktiska-np.firebasestorage.app",
+            messagingSenderId: "239785866823",
+            appId: "1:239785866823:web:55ffb3a3485d32984ca362"
+        };
+
+        const appId = 'default-app-id';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Expose to window
+        window.db = db;
+        window.collection = collection;
+        window.getDocs = getDocs;
+
+        // Course structures - EXAKT SAMMA SOM I ADMIN-PANELEN
+        const COURSE_STRUCTURE = {
+            Taluppfattning: {
+                name: 'Taluppfattning',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'prio', name: 'Prioriteringsreglen' },
+                    { id: 'neg', name: 'Negativa tal' },
+                    { id: 'potenser', name: 'Potenser' },
+                    { id: 'brak', name: 'Bråktal' },
+                    { id: 'forlangforkort', name: 'Förläng och förkorta' },
+                    { id: 'overslags', name: 'Överslagsräkning' },
+                    { id: 'blandadetal', name: 'Blandade uppgifter (Som prov)' }
+                ]
+            },
+            Algebra: {
+                name: 'Algebra',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'uttryck', name: 'Uttryck' },
+                    { id: 'forenklauttryck', name: 'Förenkla uttryck' },
+                    { id: 'parenteser', name: 'Parenteser' },
+                    { id: 'vardeavuttryck', name: 'Beräkna värde av uttryck' },
+                    { id: 'faktorisera', name: 'Faktorisera' },
+                    { id: 'formel', name: 'Lös ut ur formeln' },
+                    { id: 'ekvplusminus', name: 'Ekvationer plus och minus' },
+                    { id: 'ekvmultidiv', name: 'Ekvationer multiplikation/division' },
+                    { id: 'ekvparentes', name: 'Ekvationer med parentes' },
+                    { id: 'ekvbadasida', name: 'Ekvation med x på båda sidor' },
+                    { id: 'algebrablandat', name: 'Blandade uppgifter' }
+                ]
+            },
+            Procent: {
+                name: 'Procent',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'brakdeciproform', name: 'Bråk/Decimal/Procentform' },
+                    { id: 'delandelhela', name: 'Delen, andelen, det hela' },
+                    { id: 'procentenheter', name: 'Procentenheter' },
+                    { id: 'forandringsfaktorn', name: 'Förändringsfaktorn' },
+                    { id: 'upprepadforandring', name: 'Upprepad förändring' },
+                    { id: 'baklänges', name: 'Baklänges räkning' },
+                    { id: 'procentblandat', name: 'Blandade uppgifter' }
+                ]
+            },
+            Sannolikhet: {
+                name: 'Sannolikhet',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'grundsannolikhet', name: 'Grundläggande sannolikhet' },
+                    { id: 'enklasannolikheter', name: 'Enkla sannolikheter' },
+                    { id: 'flerautfall', name: 'Flera utfall' },
+                    { id: 'oberoendeberoende', name: 'Oberoende o beroende' },
+                    { id: 'komplement', name: 'Komplementhändelse' },
+                    { id: 'sannolikhetblandade', name: 'Blandade uppgifter' }
+                ]
+            },
+            FunktionerSamband: {
+                name: 'Funktioner och Samband',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'anvandaformler', name: 'Använda formler f(x)' },
+                    { id: 'ratalinjen', name: 'Den räta linjen' },
+                    { id: 'procentuell', name: 'Procentuell förändring' },
+                    { id: 'jamfortolka', name: 'Jämföra och tolka' },
+                    { id: 'funktionerblandade', name: 'Blandade uppgifter' }
+                ]
+            }
+        };
+
+        // NP STRUCTURE - EXAKT SAMMA SOM I ADMIN-PANELEN
+        const NP_STRUCTURE = {
+            Algebra: {
+                name: 'Algebra',
+                yearLevel: 'NP',
+                parts: [
+                    { id: 'forenklauttryck', name: 'Förenkling av uttryck' },
+                    { id: 'ekvationer', name: 'Ekvationer' },
+                    { id: 'faktorisera', name: 'Faktorisera' },
+                    { id: 'monsterformler', name: 'Mönster och formler' },
+                    { id: 'losuturformler', name: 'Lös ut ur formler' }
+                ]
+            },
+            FunktionerSamband: {
+                name: 'Funktioner',
+                yearLevel: 'NP',
+                parts: [
+                    { id: 'funktionsbegreppet', name: 'Funktionsbegreppet f(x)' },
+                    { id: 'linjarafunktioner', name: 'Linjära funktioner' },
+                    { id: 'exponentiellafunktioner', name: 'Exponentiella funktioner' },
+                    { id: 'koordinatsystem', name: 'Koordinatsystem, grafer och punkter' }
+                ]
+            },
+            Taluppfattning: {
+                name: 'Taluppfattning',
+                yearLevel: 'NP',
+                parts: [
+                    { id: 'Prioriteringsregeln', name: 'Prioriteringsregeln' },
+                    { id: 'braktal', name: 'Bråktal' },
+                    { id: 'potenser', name: 'Potenser' }
+                ]
+            },
+            Procent: {
+                name: 'Procent',
+                yearLevel: 'NP',
+                parts: [
+                    { id: 'Förändringsfaktorn', name: 'Förändringsfaktorn (intro)' },
+                    { id: 'ff', name: 'Förändringsfaktorn' },
+                    { id: 'upprepadff', name: 'Upprepad förändring' },
+                    { id: 'lanoranta', name: 'Lån, ränta och amortering' }
+                ]
+            },
+            Sannolikhet: {
+                name: 'Sannolikhet',
+                yearLevel: 'NP',
+                parts: [
+                    { id: 'beroendeoberoende', name: 'Beroende och oberoende-händelse' },
+                    { id: 'komplement', name: 'Komplementhändelse' }
+                ]
+            }
+        };
+
+        // State
+        let currentCollection = 'campaigns';
+        let allTasks = [];
+        let selectedTasks = new Set();
+
+        // Initialize
+        signInAnonymously(auth).then(() => {
+            updateStatus('connected', 'Ansluten');
+            populateTopics();
+            loadTasks();
+        }).catch(err => {
+            console.error('Auth error:', err);
+            updateStatus('error', 'Anslutningsfel');
+        });
+
+        function updateStatus(type, text) {
+            const el = document.getElementById('firebaseStatus');
+            el.className = `status-badge ${type}`;
+            const dotColor = type === 'connected' ? 'bg-green-400' : type === 'error' ? 'bg-red-400' : 'bg-yellow-400';
+            el.innerHTML = `<span class="status-dot ${dotColor}"></span><span>${text}</span>`;
+        }
+
+        function populateTopics() {
+            const select = document.getElementById('topicSelect');
+            const structure = currentCollection === 'math_tasks' ? NP_STRUCTURE : COURSE_STRUCTURE;
+            select.innerHTML = '';
+            Object.keys(structure).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = structure[key].name;
+                select.appendChild(opt);
+            });
+            populateChapters();
+        }
+        window.populateTopics = populateTopics;
+
+        function populateChapters() {
+            const topic = document.getElementById('topicSelect').value;
+            const select = document.getElementById('chapterSelect');
+            const structure = currentCollection === 'math_tasks' ? NP_STRUCTURE : COURSE_STRUCTURE;
+            const topicData = structure[topic];
+            select.innerHTML = '';
+            if (topicData && topicData.parts) {
+                topicData.parts.forEach((part, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = part.id;
+                    opt.textContent = `Del ${i + 1}: ${part.name}`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+        window.populateChapters = populateChapters;
+
+        window.setCollection = function(type) {
+            currentCollection = type;
+            document.getElementById('pathCampaigns').classList.toggle('active', type === 'campaigns');
+            document.getElementById('pathMathTasks').classList.toggle('active', type === 'math_tasks');
+            
+            // Dölj årskursväljaren för Typuppgifter NP
+            const levelContainer = document.getElementById('levelSelectContainer');
+            if (type === 'math_tasks') {
+                levelContainer.style.display = 'none';
+            } else {
+                levelContainer.style.display = 'block';
+            }
+            
+            populateTopics();
+            loadTasks();
+        };
+
+        async function loadTasks() {
+            const topic = document.getElementById('topicSelect').value;
+            const partId = document.getElementById('chapterSelect').value;
+            const level = document.getElementById('levelSelect').value;
+            const listEl = document.getElementById('taskList');
+
+            if (!topic || !partId) {
+                listEl.innerHTML = '<p class="text-gray-500 text-center py-8">Välj ämne och del först...</p>';
+                return;
+            }
+
+            listEl.innerHTML = '<p class="text-gray-500 text-center py-8">⏳ Laddar uppgifter...</p>';
+
+            try {
+                let path;
+                if (currentCollection === 'math_tasks') {
+                    path = `artifacts/${appId}/public/data/math_tasks/${topic}/${partId}`;
+                } else {
+                    const suffix = level === 'grund' ? 'grund' : '';
+                    path = `artifacts/${appId}/public/data/campaigns/${topic}/${partId}${suffix}`;
+                }
+
+                const snapshot = await getDocs(collection(db, path));
+                allTasks = [];
+                snapshot.forEach(doc => {
+                    allTasks.push({ id: doc.id, ...doc.data() });
+                });
+
+                selectedTasks.clear();
+                document.getElementById('selectAllTasks').checked = false;
+                renderTaskList();
+                updateSelectedCount();
+            } catch (e) {
+                console.error('Error:', e);
+                listEl.innerHTML = `<p class="text-red-400 text-center py-8">❌ ${e.message}</p>`;
+            }
+        }
+        window.loadTasks = loadTasks;
+
+        function renderTaskList() {
+            const listEl = document.getElementById('taskList');
+            if (allTasks.length === 0) {
+                listEl.innerHTML = '<p class="text-gray-500 text-center py-8">Inga uppgifter hittades.</p>';
+                return;
+            }
+
+            listEl.innerHTML = allTasks.map((task, idx) => {
+                const isSelected = selectedTasks.has(task.id);
+                const preview = getPreview(task);
+                return `
+                    <div class="task-item ${isSelected ? 'selected' : ''}" onclick="toggleTask('${task.id}')">
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleTask('${task.id}')">
+                        <div class="task-preview">
+                            <strong style="color: var(--primary-orange)">#${idx + 1}</strong> ${preview}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([listEl]).catch(err => console.log('MathJax:', err));
+            }
+        }
+
+        function getPreview(task) {
+            if (!task.question_sv) return 'Ingen uppgift';
+            if (Array.isArray(task.question_sv)) {
+                return task.question_sv.map(b => {
+                    if (b.type === 'math') return `\\(${b.value}\\)`;
+                    return b.value || '';
+                }).join(' ').substring(0, 100) + '...';
+            }
+            return String(task.question_sv).substring(0, 100) + '...';
+        }
+
+        window.toggleTask = function(id) {
+            if (selectedTasks.has(id)) {
+                selectedTasks.delete(id);
+            } else {
+                selectedTasks.add(id);
+            }
+            renderTaskList();
+            updateSelectedCount();
+        };
+
+        window.toggleAllTasks = function() {
+            const selectAll = document.getElementById('selectAllTasks').checked;
+            if (selectAll) {
+                allTasks.forEach(t => selectedTasks.add(t.id));
+            } else {
+                selectedTasks.clear();
+            }
+            renderTaskList();
+            updateSelectedCount();
+        };
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = `${selectedTasks.size} uppgifter valda`;
+            document.getElementById('selectAllTasks').checked = allTasks.length > 0 && selectedTasks.size === allTasks.length;
+        }
+
+        window.generateWorksheet = function() {
+            if (selectedTasks.size === 0) {
+                alert('⚠️ Välj minst en uppgift först!');
+                return;
+            }
+
+            const title = document.getElementById('worksheetTitle').value || 'Matematikövning';
+            const tasksPerPage = parseInt(document.getElementById('tasksPerPage').value);
+            const answerSpace = document.getElementById('answerSpace').value;
+            const includeAnswerKey = document.getElementById('includeAnswerKey').checked;
+            const answerKeyOnBack = document.getElementById('answerKeyOnBack').checked;
+            const includeScaffolding = document.getElementById('includeScaffolding').checked;
+            const shuffleTasks = document.getElementById('shuffleTasks').checked;
+            const includeNameDate = document.getElementById('includeNameDate').checked;
+
+            let tasks = allTasks.filter(t => selectedTasks.has(t.id));
+            if (shuffleTasks) tasks = shuffle([...tasks]);
+
+            const html = buildWorksheet(tasks, { title, tasksPerPage, answerSpace, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate });
+            document.getElementById('worksheetPreviewContent').innerHTML = html;
+            document.getElementById('worksheetModal').classList.remove('hidden');
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('worksheetPreviewContent')]).catch(err => console.log('MathJax:', err));
+            }
+        };
+
+        function buildWorksheet(tasks, opts) {
+            const { title, tasksPerPage, answerSpace, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate } = opts;
+            let html = '';
+            let answers = [];
+            const pages = [];
+            for (let i = 0; i < tasks.length; i += tasksPerPage) {
+                pages.push(tasks.slice(i, i + tasksPerPage));
+            }
+
+            pages.forEach((pageTasks, pageIdx) => {
+                html += `<div class="worksheet-page">`;
+                if (pageIdx === 0) {
+                    html += `
+                        <div class="worksheet-header">
+                            <div class="worksheet-title">${escapeHtml(title)}</div>
+                            ${includeNameDate ? `
+                                <div class="worksheet-name-date">
+                                    <label>Namn: <span class="line"></span></label>
+                                    <label>Datum: <span class="line"></span></label>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    html += `<div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">${escapeHtml(title)} - Sida ${pageIdx + 1}</div>`;
+                }
+
+                pageTasks.forEach((task, idx) => {
+                    const num = pageIdx * tasksPerPage + idx + 1;
+                    answers.push({ num, answer: task.answer || '?' });
+
+                    html += `<div class="worksheet-task">`;
+                    html += `<div class="worksheet-task-number">Uppgift ${num}</div>`;
+                    html += `<div class="worksheet-task-content">${renderContent(task.question_sv)}</div>`;
+
+                    if (includeScaffolding && task.scaffolding_sv && task.scaffolding_sv.length > 0) {
+                        html += `<div class="worksheet-scaffolding">`;
+                        html += `<div class="worksheet-scaffolding-title">💡 Tips:</div>`;
+                        if (Array.isArray(task.scaffolding_sv)) {
+                            html += `<div class="worksheet-scaffolding-list">`;
+                            task.scaffolding_sv.forEach((s, i) => {
+                                html += `<div class="worksheet-scaffolding-item">${i + 1}. ${formatMath(s.value || s)}</div>`;
+                            });
+                            html += `</div>`;
+                        }
+                        html += `</div>`;
+                    }
+
+                    if (answerSpace === 'line') html += `<div class="worksheet-answer-line"></div>`;
+                    else if (answerSpace === 'box') html += `<div class="worksheet-answer-box"></div>`;
+
+                    html += `</div>`;
+                });
+
+                if (includeAnswerKey && !answerKeyOnBack && pageIdx === pages.length - 1) {
+                    html += buildAnswerKey(answers);
+                }
+
+                html += `</div>`;
+            });
+
+            if (includeAnswerKey && answerKeyOnBack) {
+                html += `
+                    <div class="worksheet-page">
+                        <div class="worksheet-title" style="margin-bottom: 20px;">📝 Facit - ${escapeHtml(title)}</div>
+                        ${buildAnswerKey(answers, true)}
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        function buildAnswerKey(answers, fullPage = false) {
+            let html = `<div class="worksheet-answer-key" ${fullPage ? 'style="border-top: none; margin-top: 0; padding-top: 0;"' : ''}>`;
+            if (!fullPage) html += `<div class="worksheet-answer-key-title">✅ Facit</div>`;
+            html += `<div class="worksheet-answer-list">`;
+            answers.forEach(a => {
+                let ans = a.answer || '?';
+                if (typeof ans === 'string') {
+                    ans = ans.replace(/\$/g, '');
+                    ans = ans.replace(/\^(\d+)/g, '<sup>$1</sup>');
+                    ans = ans.replace(/\^{([^}]+)}/g, '<sup>$1</sup>');
+                    ans = ans.replace(/\\text\{eller\}/g, ' eller ');
+                    ans = ans.replace(/\\text\{/g, '').replace(/\}/g, '');
+                    ans = ans.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2');
+                    ans = ans.replace(/\\cdot/g, '·');
+                    ans = ans.replace(/\\times/g, '×');
+                    ans = ans.replace(/\\pm/g, '±');
+                    ans = ans.replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
+                    ans = ans.replace(/\\\\/g, '');
+                }
+                html += `<div class="worksheet-answer-item"><strong>${a.num}.</strong> ${ans}</div>`;
+            });
+            html += `</div></div>`;
+            return html;
+        }
+
+        function renderContent(q) {
+            if (!q) return '';
+            if (Array.isArray(q)) {
+                return q.map(b => {
+                    if (!b) return '';
+                    if (b.type === 'math') return `<div style="text-align:center;margin:10px 0;">$$${b.value}$$</div>`;
+                    if (b.type === 'text') return `<p>${formatMath(b.value || '')}</p>`;
+                    if (b.type === 'image' && b.value) return `<img src="${b.value}" alt="Bild" style="max-width:100%;max-height:200px;margin:10px 0;">`;
+                    return `<p>${formatMath(b.value || '')}</p>`;
+                }).join('');
+            }
+            return `<p>${formatMath(String(q))}</p>`;
+        }
+
+        function formatMath(text) {
+            if (!text) return '';
+            return text.replace(/\$([^$]+)\$/g, '\\($1\\)');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        window.closeModal = function() {
+            document.getElementById('worksheetModal').classList.add('hidden');
+        };
+
+        window.printWorksheet = function() {
+            if (selectedTasks.size === 0) {
+                alert('⚠️ Välj minst en uppgift och förhandsgranska först!');
+                return;
+            }
+
+            const content = document.getElementById('worksheetPreviewContent').innerHTML;
+            if (!content || content.trim() === '') {
+                generateWorksheet();
+                setTimeout(printWorksheet, 500);
+                return;
+            }
+
+            let printArea = document.getElementById('worksheetPrintArea');
+            if (!printArea) {
+                printArea = document.createElement('div');
+                printArea.id = 'worksheetPrintArea';
+                printArea.style.display = 'none';
+                document.body.appendChild(printArea);
+            }
+
+            printArea.innerHTML = content;
+            printArea.style.display = 'block';
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([printArea]).then(() => {
+                    window.print();
+                    setTimeout(() => { printArea.style.display = 'none'; }, 1000);
+                });
+            } else {
+                window.print();
+                setTimeout(() => { printArea.style.display = 'none'; }, 1000);
+            }
+        };
+    </script>
+</body>
+</html>
