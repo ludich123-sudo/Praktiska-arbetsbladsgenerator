@@ -272,11 +272,30 @@
             gap: 8px 20px;
         }
         .worksheet-answer-item {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             font-size: 0.95rem;
         }
         .worksheet-answer-item strong {
             color: #e65c00;
+        }
+        /* Pretty fractions */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-size: 0.85em;
+            line-height: 1.1;
+        }
+        .frac-num, .frac-den {
+            display: block;
+            text-align: center;
+            padding: 0 2px;
+        }
+        .frac-num {
+            border-bottom: 1px solid currentColor;
         }
 
         /* Modal */
@@ -425,14 +444,36 @@
                     </div>
                 </div>
 
+                <!-- Selected Tasks Summary -->
+                <div id="selectedTasksSummary" class="card p-4 mb-4 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">📋</span>
+                            <div>
+                                <h3 class="font-semibold text-white">Valda uppgifter</h3>
+                                <p id="totalSelectedInfo" class="text-sm text-gray-400">0 uppgifter från 0 områden</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="totalSelectedCount" class="text-xl font-bold" style="color: var(--primary-orange);">0</span>
+                            <button onclick="clearAllSelectedTasks()" class="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white transition">
+                                Rensa alla
+                            </button>
+                        </div>
+                    </div>
+                    <div id="selectedTasksBreakdown" class="mt-3 flex flex-wrap gap-2">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
                 <!-- Task List Card -->
                 <div class="card">
                     <div class="flex items-center justify-between p-4 border-b border-[#3a3a3a]">
                         <div class="flex items-center gap-3">
                             <input type="checkbox" id="selectAllTasks" class="w-5 h-5 rounded" onchange="toggleAllTasks()">
-                            <label for="selectAllTasks" class="font-semibold text-white cursor-pointer">Välj alla</label>
+                            <label for="selectAllTasks" class="font-semibold text-white cursor-pointer">Välj alla (denna del)</label>
                         </div>
-                        <div id="selectedCount" class="text-sm font-medium" style="color: var(--primary-orange);">0 uppgifter valda</div>
+                        <div id="selectedCount" class="text-sm font-medium" style="color: var(--primary-orange);">0 valda här</div>
                     </div>
                     <div id="taskList" class="max-h-[450px] overflow-y-auto p-4 space-y-2">
                         <p class="text-gray-500 text-center py-8">Laddar uppgifter...</p>
@@ -686,7 +727,10 @@
         // State
         let currentCollection = 'campaigns';
         let allTasks = [];
-        let selectedTasks = new Set();
+        // Global storage: Map of taskId -> { task data, source info }
+        let globalSelectedTasks = new Map();
+        // Track which task IDs are selected in current view
+        let currentViewSelectedIds = new Set();
 
         // Initialize
         signInAnonymously(auth).then(() => {
@@ -703,6 +747,21 @@
             el.className = `status-badge ${type}`;
             const dotColor = type === 'connected' ? 'bg-green-400' : type === 'error' ? 'bg-red-400' : 'bg-yellow-400';
             el.innerHTML = `<span class="status-dot ${dotColor}"></span><span>${text}</span>`;
+        }
+
+        function getCurrentSourceKey() {
+            const topic = document.getElementById('topicSelect').value;
+            const partId = document.getElementById('chapterSelect').value;
+            const level = document.getElementById('levelSelect').value;
+            const structure = currentCollection === 'math_tasks' ? NP_STRUCTURE : COURSE_STRUCTURE;
+            const topicData = structure[topic];
+            const partData = topicData?.parts?.find(p => p.id === partId);
+            const partName = partData ? partData.name : partId;
+            const topicName = topicData ? topicData.name : topic;
+            return {
+                key: `${currentCollection}|${topic}|${partId}|${level}`,
+                label: `${topicName} - ${partName}${currentCollection === 'campaigns' && level === 'grund' ? ' (Grund)' : ''}`
+            };
         }
 
         function populateTopics() {
@@ -781,10 +840,20 @@
                     allTasks.push({ id: doc.id, ...doc.data() });
                 });
 
-                selectedTasks.clear();
+                // Update current view selected IDs based on what's in global storage
+                currentViewSelectedIds.clear();
+                const sourceInfo = getCurrentSourceKey();
+                allTasks.forEach(task => {
+                    const globalKey = `${sourceInfo.key}|${task.id}`;
+                    if (globalSelectedTasks.has(globalKey)) {
+                        currentViewSelectedIds.add(task.id);
+                    }
+                });
+
                 document.getElementById('selectAllTasks').checked = false;
                 renderTaskList();
                 updateSelectedCount();
+                updateGlobalSummary();
             } catch (e) {
                 console.error('Error:', e);
                 listEl.innerHTML = `<p class="text-red-400 text-center py-8">❌ ${e.message}</p>`;
@@ -800,7 +869,7 @@
             }
 
             listEl.innerHTML = allTasks.map((task, idx) => {
-                const isSelected = selectedTasks.has(task.id);
+                const isSelected = currentViewSelectedIds.has(task.id);
                 const preview = getPreview(task);
                 return `
                     <div class="task-item ${isSelected ? 'selected' : ''}" onclick="toggleTask('${task.id}')">
@@ -829,33 +898,125 @@
         }
 
         window.toggleTask = function(id) {
-            if (selectedTasks.has(id)) {
-                selectedTasks.delete(id);
+            const sourceInfo = getCurrentSourceKey();
+            const globalKey = `${sourceInfo.key}|${id}`;
+            const task = allTasks.find(t => t.id === id);
+
+            if (currentViewSelectedIds.has(id)) {
+                currentViewSelectedIds.delete(id);
+                globalSelectedTasks.delete(globalKey);
             } else {
-                selectedTasks.add(id);
+                currentViewSelectedIds.add(id);
+                globalSelectedTasks.set(globalKey, {
+                    task: task,
+                    sourceKey: sourceInfo.key,
+                    sourceLabel: sourceInfo.label
+                });
             }
             renderTaskList();
             updateSelectedCount();
+            updateGlobalSummary();
         };
 
         window.toggleAllTasks = function() {
             const selectAll = document.getElementById('selectAllTasks').checked;
+            const sourceInfo = getCurrentSourceKey();
+
             if (selectAll) {
-                allTasks.forEach(t => selectedTasks.add(t.id));
+                allTasks.forEach(task => {
+                    const globalKey = `${sourceInfo.key}|${task.id}`;
+                    currentViewSelectedIds.add(task.id);
+                    globalSelectedTasks.set(globalKey, {
+                        task: task,
+                        sourceKey: sourceInfo.key,
+                        sourceLabel: sourceInfo.label
+                    });
+                });
             } else {
-                selectedTasks.clear();
+                allTasks.forEach(task => {
+                    const globalKey = `${sourceInfo.key}|${task.id}`;
+                    currentViewSelectedIds.delete(task.id);
+                    globalSelectedTasks.delete(globalKey);
+                });
             }
             renderTaskList();
             updateSelectedCount();
+            updateGlobalSummary();
         };
 
         function updateSelectedCount() {
-            document.getElementById('selectedCount').textContent = `${selectedTasks.size} uppgifter valda`;
-            document.getElementById('selectAllTasks').checked = allTasks.length > 0 && selectedTasks.size === allTasks.length;
+            const currentCount = currentViewSelectedIds.size;
+            document.getElementById('selectedCount').textContent = `${currentCount} valda här`;
+            document.getElementById('selectAllTasks').checked = allTasks.length > 0 && currentCount === allTasks.length;
         }
 
+        function updateGlobalSummary() {
+            const summaryEl = document.getElementById('selectedTasksSummary');
+            const totalEl = document.getElementById('totalSelectedCount');
+            const infoEl = document.getElementById('totalSelectedInfo');
+            const breakdownEl = document.getElementById('selectedTasksBreakdown');
+
+            const totalCount = globalSelectedTasks.size;
+
+            if (totalCount === 0) {
+                summaryEl.classList.add('hidden');
+                return;
+            }
+
+            summaryEl.classList.remove('hidden');
+            totalEl.textContent = totalCount;
+
+            // Group by source
+            const bySource = new Map();
+            globalSelectedTasks.forEach(({ sourceKey, sourceLabel }) => {
+                if (!bySource.has(sourceKey)) {
+                    bySource.set(sourceKey, { label: sourceLabel, count: 0 });
+                }
+                bySource.get(sourceKey).count++;
+            });
+
+            infoEl.textContent = `${totalCount} uppgifter från ${bySource.size} ${bySource.size === 1 ? 'område' : 'områden'}`;
+
+            breakdownEl.innerHTML = Array.from(bySource.entries()).map(([key, { label, count }]) => `
+                <div class="flex items-center gap-2 bg-[#333] px-3 py-1.5 rounded-full text-sm">
+                    <span class="text-gray-300">${label}</span>
+                    <span class="font-bold" style="color: var(--primary-orange);">${count}</span>
+                    <button onclick="removeSourceTasks('${key}')" class="text-gray-500 hover:text-red-400 transition ml-1" title="Ta bort dessa">✕</button>
+                </div>
+            `).join('');
+        }
+
+        window.removeSourceTasks = function(sourceKey) {
+            const keysToRemove = [];
+            globalSelectedTasks.forEach((value, key) => {
+                if (value.sourceKey === sourceKey) {
+                    keysToRemove.push(key);
+                }
+            });
+            keysToRemove.forEach(key => globalSelectedTasks.delete(key));
+
+            // Update current view if we're in that source
+            const currentSource = getCurrentSourceKey();
+            if (currentSource.key === sourceKey) {
+                currentViewSelectedIds.clear();
+                renderTaskList();
+            }
+
+            updateSelectedCount();
+            updateGlobalSummary();
+        };
+
+        window.clearAllSelectedTasks = function() {
+            globalSelectedTasks.clear();
+            currentViewSelectedIds.clear();
+            document.getElementById('selectAllTasks').checked = false;
+            renderTaskList();
+            updateSelectedCount();
+            updateGlobalSummary();
+        };
+
         window.generateWorksheet = function() {
-            if (selectedTasks.size === 0) {
+            if (globalSelectedTasks.size === 0) {
                 alert('⚠️ Välj minst en uppgift först!');
                 return;
             }
@@ -869,7 +1030,8 @@
             const shuffleTasks = document.getElementById('shuffleTasks').checked;
             const includeNameDate = document.getElementById('includeNameDate').checked;
 
-            let tasks = allTasks.filter(t => selectedTasks.has(t.id));
+            // Collect all tasks from global selection
+            let tasks = Array.from(globalSelectedTasks.values()).map(item => item.task);
             if (shuffleTasks) tasks = shuffle([...tasks]);
 
             const html = buildWorksheet(tasks, { title, tasksPerPage, answerSpace, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate });
@@ -962,16 +1124,30 @@
                 let ans = a.answer || '?';
                 if (typeof ans === 'string') {
                     ans = ans.replace(/\$/g, '');
+                    
+                    // Handle fractions with proper HTML display (recursive for nested)
+                    let prevAns = '';
+                    while (prevAns !== ans) {
+                        prevAns = ans;
+                        ans = ans.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '<span class="frac"><span class="frac-num">$1</span><span class="frac-den">$2</span></span>');
+                    }
+                    
                     ans = ans.replace(/\^(\d+)/g, '<sup>$1</sup>');
                     ans = ans.replace(/\^{([^}]+)}/g, '<sup>$1</sup>');
-                    ans = ans.replace(/\\text\{eller\}/g, ' eller ');
-                    ans = ans.replace(/\\text\{/g, '').replace(/\}/g, '');
-                    ans = ans.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2');
+                    ans = ans.replace(/\\text\{([^}]*)\}/g, '$1');
                     ans = ans.replace(/\\cdot/g, '·');
                     ans = ans.replace(/\\times/g, '×');
                     ans = ans.replace(/\\pm/g, '±');
                     ans = ans.replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
+                    ans = ans.replace(/\\pi/g, 'π');
+                    ans = ans.replace(/\\leq/g, '≤');
+                    ans = ans.replace(/\\geq/g, '≥');
+                    ans = ans.replace(/\\neq/g, '≠');
+                    ans = ans.replace(/\\approx/g, '≈');
+                    ans = ans.replace(/\\left/g, '');
+                    ans = ans.replace(/\\right/g, '');
                     ans = ans.replace(/\\\\/g, '');
+                    ans = ans.replace(/\\/g, ''); // Remove any remaining backslashes
                 }
                 html += `<div class="worksheet-answer-item"><strong>${a.num}.</strong> ${ans}</div>`;
             });
@@ -1017,7 +1193,7 @@
         };
 
         window.printWorksheet = function() {
-            if (selectedTasks.size === 0) {
+            if (globalSelectedTasks.size === 0) {
                 alert('⚠️ Välj minst en uppgift och förhandsgranska först!');
                 return;
             }
