@@ -825,6 +825,14 @@
 
             listEl.innerHTML = '<p class="text-gray-500 text-center py-8">⏳ Laddar uppgifter...</p>';
 
+            // Calculate source key BEFORE loading (based on current selections)
+            const structure = currentCollection === 'math_tasks' ? NP_STRUCTURE : COURSE_STRUCTURE;
+            const topicData = structure[topic];
+            const partData = topicData?.parts?.find(p => p.id === partId);
+            const partName = partData ? partData.name : partId;
+            const topicName = topicData ? topicData.name : topic;
+            const currentSourceKey = `${currentCollection}|${topic}|${partId}|${level}`;
+
             try {
                 let path;
                 if (currentCollection === 'math_tasks') {
@@ -841,10 +849,10 @@
                 });
 
                 // Update current view selected IDs based on what's in global storage
+                // Use the pre-calculated source key to match correctly
                 currentViewSelectedIds.clear();
-                const sourceInfo = getCurrentSourceKey();
                 allTasks.forEach(task => {
-                    const globalKey = `${sourceInfo.key}|${task.id}`;
+                    const globalKey = `${currentSourceKey}|${task.id}`;
                     if (globalSelectedTasks.has(globalKey)) {
                         currentViewSelectedIds.add(task.id);
                     }
