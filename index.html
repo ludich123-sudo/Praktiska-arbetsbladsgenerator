@@ -221,16 +221,870 @@
             height: auto;
             margin: 10px 0;
         }
-        .worksheet-answer-line {
+        .worksheet-answer-lines {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
             margin-top: 12px;
+        }
+        .worksheet-answer-line {
             border-bottom: 1px solid #666;
             height: 24px;
         }
         .worksheet-answer-box {
             margin-top: 12px;
             border: 1px solid #666;
-            height: 40px;
+            min-height: 40px;
             border-radius: 4px;
+        }
+        
+        /* Drag and drop styles */
+        .sortable-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .sortable-item {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+        .sortable-item:hover {
+            border-color: var(--primary-orange);
+        }
+        .sortable-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary-orange);
+            transform: scale(1.02);
+        }
+        .sortable-item.drag-over {
+            border-color: var(--primary-orange-light);
+            background: rgba(230, 92, 0, 0.1);
+        }
+        .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            background: #333;
+            cursor: grab;
+            color: #666;
+            font-size: 16px;
+            user-select: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .drag-handle:hover {
+            background: #444;
+            color: var(--primary-orange);
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .sortable-content {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+        .sortable-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .sortable-number {
+            font-weight: 700;
+            color: var(--primary-orange);
+            font-size: 13px;
+        }
+        .sortable-source {
+            font-size: 10px;
+            color: #888;
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        .sortable-preview {
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.4;
+        }
+        .answer-size-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #3a3a3a;
+        }
+        .answer-size-label {
+            font-size: 10px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .answer-size-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        .answer-size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .answer-size-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .answer-size-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            cursor: pointer;
+            border: none;
+        }
+        .answer-size-value {
+            font-size: 11px;
+            color: var(--primary-orange);
+            font-weight: 600;
+            min-width: 35px;
+            text-align: right;
+        }
+        .remove-task-btn {
+            padding: 6px 10px;
+            background: transparent;
+            color: #666;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .remove-task-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        /* New split-panel layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+            height: calc(100vh - 100px);
+        }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+        .task-selection-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .task-list-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .task-list-card .card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .task-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        
+        /* Organize panel as sticky right sidebar section */
+        .organize-panel {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+            border: 1px solid #3a3a3a;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+        .organize-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+        .organize-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: white;
+        }
+        .organize-badge {
+            background: var(--primary-orange);
+            color: white;
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .organize-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            min-height: 0;
+        }
+        .empty-organize {
+            text-align: center;
+            padding: 30px 15px;
+            color: #666;
+        }
+        .empty-organize-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        /* Settings card compact */
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px;
+            flex-shrink: 0;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .settings-full {
+            grid-column: span 2;
+        }
+        .settings-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .settings-select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .settings-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .checkbox-item input {
+            width: 14px;
+            height: 14px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .action-buttons .btn-primary,
+        .action-buttons .btn-secondary {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        
+        /* Editor View (fullscreen) */
+        .editor-view {
+            position: fixed;
+            inset: 0;
+            background: #1a1a1a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .editor-view.hidden {
+            display: none;
+        }
+        .editor-header {
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            border-bottom: 1px solid #333;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .editor-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .editor-back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .editor-back-btn:hover {
+            background: #444;
+            border-color: var(--primary-orange);
+        }
+        .editor-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+        .editor-task-count {
+            background: var(--primary-orange);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .editor-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .editor-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 0;
+            overflow: hidden;
+        }
+        .editor-tasks-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-right: 1px solid #333;
+        }
+        .editor-tasks-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #333;
+            background: #222;
+        }
+        .editor-tasks-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .editor-tasks-hint {
+            font-size: 12px;
+            color: #666;
+        }
+        .editor-tasks-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .editor-task-item {
+            display: flex;
+            align-items: stretch;
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .editor-task-item:hover {
+            border-color: var(--primary-orange);
+        }
+        .editor-task-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed var(--primary-orange);
+            transform: scale(1.02);
+        }
+        .editor-task-item.drag-over {
+            border-color: var(--primary-orange-light);
+            background: rgba(230, 92, 0, 0.1);
+        }
+        .editor-drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            background: #333;
+            color: #666;
+            font-size: 16px;
+            user-select: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            cursor: grab;
+        }
+        .editor-drag-handle:active {
+            cursor: grabbing;
+        }
+        .editor-task-item:hover .editor-drag-handle {
+            color: var(--primary-orange);
+            background: #3a3a3a;
+        }
+        .editor-task-content {
+            flex: 1;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .editor-task-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .editor-task-number {
+            font-weight: 700;
+            color: var(--primary-orange);
+            font-size: 13px;
+        }
+        .editor-task-source {
+            font-size: 10px;
+            color: #888;
+            background: #333;
+            padding: 2px 8px;
+            border-radius: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        .editor-task-preview {
+            font-size: 12px;
+            color: #ddd;
+            line-height: 1.5;
+            min-height: 18px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            background: #222;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #3a3a3a;
+        }
+        /* Answer type toggle buttons */
+        .editor-answer-type {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .answer-type-btn {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: #888;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .answer-type-btn:hover {
+            background: #333;
+            color: #bbb;
+        }
+        .answer-type-btn.active {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+        .editor-size-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: #222;
+            border-radius: 6px;
+            border: 1px solid #3a3a3a;
+            margin-top: 4px;
+        }
+        .editor-size-control.hidden {
+            display: none;
+        }
+        .editor-size-label {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+        .editor-size-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        .editor-size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .editor-size-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        .editor-size-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            cursor: pointer;
+            border: none;
+        }
+        .editor-size-value {
+            font-size: 11px;
+            color: var(--primary-orange);
+            font-weight: 600;
+            min-width: 45px;
+            text-align: right;
+        }
+        .editor-remove-btn {
+            padding: 10px 12px;
+            background: transparent;
+            color: #666;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .editor-remove-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        /* Editor Settings Panel */
+        .editor-settings-panel {
+            background: #222;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .editor-settings-section {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+        }
+        .editor-settings-section:last-child {
+            border-bottom: none;
+        }
+        .editor-settings-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .editor-settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .editor-settings-full {
+            grid-column: span 2;
+        }
+        .editor-field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        .editor-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+        }
+        .editor-input:focus {
+            border-color: var(--primary-orange);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(230, 92, 0, 0.2);
+        }
+        .editor-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            font-size: 13px;
+        }
+        .editor-select:focus {
+            border-color: var(--primary-orange);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(230, 92, 0, 0.2);
+        }
+        .editor-checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .editor-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #ccc;
+            cursor: pointer;
+            padding: 8px 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+        .editor-checkbox-item:hover {
+            background: #333;
+        }
+        .editor-checkbox-item input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-orange);
+        }
+        .editor-actions {
+            padding: 20px;
+            background: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+        }
+        .editor-btn-primary {
+            background: var(--primary-orange);
+            color: white;
+            font-weight: 600;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .editor-btn-primary:hover {
+            background: var(--primary-orange-light);
+            transform: translateY(-1px);
+        }
+        .editor-btn-secondary {
+            background: #333;
+            color: white;
+            font-weight: 600;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: 1px solid #444;
+            transition: all 0.2s;
+        }
+        .editor-btn-secondary:hover {
+            background: #444;
+        }
+        
+        /* Empty editor state */
+        .editor-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            text-align: center;
+            padding: 40px;
+        }
+        .editor-empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .editor-empty h3 {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .editor-empty p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Continue button in main view */
+        .continue-btn {
+            background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-orange-light) 100%);
+            color: white;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(230, 92, 0, 0.3);
+        }
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(230, 92, 0, 0.4);
+        }
+        .continue-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        /* Selected summary compact */
+        .selected-summary {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .selected-summary.hidden {
+            display: none;
+        }
+        .summary-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .summary-count {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-orange);
+        }
+        .summary-text {
+            font-size: 12px;
+            color: #888;
+        }
+        .summary-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .clear-btn {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .right-panel {
+                order: -1;
+            }
+            .organize-panel {
+                max-height: 300px;
+            }
         }
         .worksheet-scaffolding {
             background: #fff7ed;
@@ -298,7 +1152,10 @@
             border-bottom: 1px solid currentColor;
         }
 
-        /* Modal */
+        /* Modal - must be above editor view */
+        #worksheetModal {
+            z-index: 200 !important;
+        }
         .modal-overlay {
             background: rgba(0, 0, 0, 0.85);
         }
@@ -402,154 +1259,108 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <main class="max-w-7xl mx-auto p-4">
+        <div class="main-layout">
             
-            <!-- Left: Task Selection -->
-            <div class="lg:col-span-2 space-y-4">
+            <!-- Left Panel: Source selection + Task list -->
+            <div class="left-panel">
                 
                 <!-- Source Selection Card -->
-                <div class="card p-5">
-                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Välj källa</h2>
-                    
-                    <!-- Path buttons -->
-                    <div class="grid grid-cols-2 gap-3 mb-5">
-                        <button id="pathCampaigns" class="path-btn active" onclick="setCollection('campaigns')">
-                            🚀 Kapitelträning
-                        </button>
-                        <button id="pathMathTasks" class="path-btn" onclick="setCollection('math_tasks')">
-                            🎯 Typuppgifter NP
-                        </button>
-                    </div>
-                    
-                    <!-- Filters -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Ämne</label>
-                            <select id="topicSelect" class="w-full p-3 rounded-lg" onchange="populateChapters(); loadTasks();">
-                            </select>
-                        </div>
-                        <div id="levelSelectContainer">
-                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Årskurs</label>
-                            <select id="levelSelect" class="w-full p-3 rounded-lg" onchange="loadTasks();">
-                                <option value="ma1" selected>Ma 1</option>
-                                <option value="grund">Matematik Grund</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Del</label>
-                            <select id="chapterSelect" class="w-full p-3 rounded-lg" onchange="loadTasks();">
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Selected Tasks Summary -->
-                <div id="selectedTasksSummary" class="card p-4 mb-4 hidden">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl">📋</span>
-                            <div>
-                                <h3 class="font-semibold text-white">Valda uppgifter</h3>
-                                <p id="totalSelectedInfo" class="text-sm text-gray-400">0 uppgifter från 0 områden</p>
+                <div class="card p-4" style="flex-shrink: 0;">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Välj källa</h2>
+                        <!-- Selected summary inline -->
+                        <div id="selectedTasksSummary" class="selected-summary hidden">
+                            <div class="summary-info">
+                                <span class="summary-count" id="totalSelectedCount">0</span>
+                                <span class="summary-text" id="totalSelectedInfo">uppgifter</span>
                             </div>
+                            <button onclick="clearAllSelectedTasks()" class="clear-btn">Rensa alla</button>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span id="totalSelectedCount" class="text-xl font-bold" style="color: var(--primary-orange);">0</span>
-                            <button onclick="clearAllSelectedTasks()" class="text-xs px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white transition">
-                                Rensa alla
+                    </div>
+                    
+                    <!-- Path buttons + Filters in one row -->
+                    <div class="flex flex-wrap gap-3 items-end">
+                        <div class="flex gap-2">
+                            <button id="pathCampaigns" class="path-btn active" onclick="setCollection('campaigns')" style="padding: 8px 14px; font-size: 12px;">
+                                🚀 Kapitelträning
+                            </button>
+                            <button id="pathMathTasks" class="path-btn" onclick="setCollection('math_tasks')" style="padding: 8px 14px; font-size: 12px;">
+                                🎯 Typuppgifter NP
                             </button>
                         </div>
-                    </div>
-                    <div id="selectedTasksBreakdown" class="mt-3 flex flex-wrap gap-2">
-                        <!-- Filled dynamically -->
+                        <div class="flex gap-2 flex-1">
+                            <select id="topicSelect" class="p-2 rounded-lg text-sm flex-1" onchange="populateChapters(); loadTasks();"></select>
+                            <div id="levelSelectContainer">
+                                <select id="levelSelect" class="p-2 rounded-lg text-sm" onchange="loadTasks();">
+                                    <option value="ma1" selected>Ma 1</option>
+                                    <option value="grund">Grund</option>
+                                </select>
+                            </div>
+                            <select id="chapterSelect" class="p-2 rounded-lg text-sm flex-1" onchange="loadTasks();"></select>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Task List Card -->
-                <div class="card">
-                    <div class="flex items-center justify-between p-4 border-b border-[#3a3a3a]">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="selectAllTasks" class="w-5 h-5 rounded" onchange="toggleAllTasks()">
-                            <label for="selectAllTasks" class="font-semibold text-white cursor-pointer">Välj alla (denna del)</label>
+                <div class="task-list-card">
+                    <div class="card">
+                        <div class="flex items-center justify-between p-3 border-b border-[#3a3a3a]" style="flex-shrink: 0;">
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="selectAllTasks" class="w-4 h-4 rounded" onchange="toggleAllTasks()">
+                                <label for="selectAllTasks" class="font-semibold text-white cursor-pointer text-sm">Välj alla</label>
+                            </div>
+                            <div id="selectedCount" class="text-sm font-medium" style="color: var(--primary-orange);">0 valda</div>
                         </div>
-                        <div id="selectedCount" class="text-sm font-medium" style="color: var(--primary-orange);">0 valda här</div>
-                    </div>
-                    <div id="taskList" class="max-h-[450px] overflow-y-auto p-4 space-y-2">
-                        <p class="text-gray-500 text-center py-8">Laddar uppgifter...</p>
+                        <div id="taskList" class="task-list-scroll space-y-2">
+                            <p class="text-gray-500 text-center py-8">Laddar uppgifter...</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Settings -->
-            <div class="space-y-4">
+            <!-- Right Panel: Summary + Settings -->
+            <div class="right-panel">
                 
-                <!-- Settings Card -->
-                <div class="card p-5">
-                    <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Inställningar</h2>
-                    
-                    <!-- Title -->
-                    <div class="mb-5">
-                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Titel på arbetsbladet</label>
-                        <input type="text" id="worksheetTitle" class="w-full p-3 rounded-lg" placeholder="t.ex. Algebra övning 1">
+                <!-- Selected Tasks Summary -->
+                <div id="organizeCard" class="organize-panel">
+                    <div class="organize-header">
+                        <div class="organize-title">
+                            <span>📋</span>
+                            <span>Valda uppgifter</span>
+                            <span id="organizeBadge" class="organize-badge">0</span>
+                        </div>
                     </div>
-
-                    <!-- Tasks per page -->
-                    <div class="mb-5">
-                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Uppgifter per sida</label>
-                        <select id="tasksPerPage" class="w-full p-3 rounded-lg">
-                            <option value="4">4 uppgifter (stor storlek)</option>
-                            <option value="6" selected>6 uppgifter (medium)</option>
-                            <option value="8">8 uppgifter (kompakt)</option>
-                            <option value="10">10 uppgifter (liten storlek)</option>
-                        </select>
-                    </div>
-
-                    <!-- Answer space -->
-                    <div class="mb-5">
-                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-2">Svarsplats</label>
-                        <select id="answerSpace" class="w-full p-3 rounded-lg">
-                            <option value="line">Linje för svar</option>
-                            <option value="box">Ruta för svar</option>
-                            <option value="none">Ingen svarsplats</option>
-                        </select>
-                    </div>
-
-                    <!-- Checkboxes -->
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="includeAnswerKey" class="w-4 h-4 rounded" checked>
-                            <span class="text-sm text-gray-300 group-hover:text-white transition">Inkludera facit</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="answerKeyOnBack" class="w-4 h-4 rounded">
-                            <span class="text-sm text-gray-300 group-hover:text-white transition">Facit på separat sida</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="includeScaffolding" class="w-4 h-4 rounded">
-                            <span class="text-sm text-gray-300 group-hover:text-white transition">Inkludera tips</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="shuffleTasks" class="w-4 h-4 rounded">
-                            <span class="text-sm text-gray-300 group-hover:text-white transition">Slumpa ordning</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" id="includeNameDate" class="w-4 h-4 rounded" checked>
-                            <span class="text-sm text-gray-300 group-hover:text-white transition">Namn- och datumfält</span>
-                        </label>
+                    <div id="organizeBody" class="organize-body">
+                        <div id="sortableList" class="sortable-list">
+                            <!-- Simple list of selected tasks -->
+                        </div>
+                        <div id="emptyOrganize" class="empty-organize">
+                            <div class="empty-organize-icon">📝</div>
+                            <p style="font-size: 12px;">Välj uppgifter från listan till vänster</p>
+                            <p style="font-size: 10px; color: #555; margin-top: 6px;">Klicka "Gå vidare" för att ordna och anpassa</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="space-y-3">
-                    <button onclick="generateWorksheet()" class="btn-primary w-full">
-                        👁️ Förhandsgranska
+                <!-- Hidden settings for main view (synced with editor) -->
+                <input type="hidden" id="worksheetTitle" value="">
+                <input type="hidden" id="tasksPerPage" value="6">
+                <input type="hidden" id="answerSpace" value="box">
+                <input type="hidden" id="includeAnswerKey" value="true">
+                <input type="hidden" id="answerKeyOnBack" value="false">
+                <input type="hidden" id="includeScaffolding" value="false">
+                <input type="hidden" id="shuffleTasks" value="false">
+                <input type="hidden" id="includeNameDate" value="true">
+                
+                <!-- Continue button card -->
+                <div class="settings-card" style="padding: 16px;">
+                    <button id="continueBtn" onclick="openEditorView()" class="continue-btn" style="width: 100%;" disabled>
+                        ✨ Gå vidare
+                        <span id="continueBtnCount"></span>
                     </button>
-                    <button onclick="printWorksheet()" class="btn-secondary w-full">
-                        🖨️ Skriv ut / Ladda ner PDF
-                    </button>
-                    <p class="text-xs text-gray-500 text-center leading-relaxed">
-                        💡 <strong>Tips:</strong> I utskriftsdialogen, klicka på "Fler inställningar" och avmarkera "Sidhuvud och sidfot" för att ta bort datum/URL.
+                    <p style="font-size: 11px; color: #666; text-align: center; margin-top: 10px;">
+                        Ordna uppgifter, justera svarsrutor och ändra inställningar
                     </p>
                 </div>
             </div>
@@ -573,6 +1384,90 @@
             </div>
             <div id="worksheetPreviewContent" class="bg-gray-100 p-6">
                 <!-- Worksheet pages rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor View (Fullscreen) -->
+    <div id="editorView" class="editor-view hidden">
+        <div class="editor-header">
+            <div class="editor-header-left">
+                <button onclick="closeEditorView()" class="editor-back-btn">
+                    ← Tillbaka
+                </button>
+                <h2 class="editor-title">📝 Redigera arbetsblad</h2>
+                <span id="editorTaskCount" class="editor-task-count">0 uppgifter</span>
+            </div>
+            <div class="editor-header-right">
+                <button onclick="generateWorksheet()" class="editor-btn-secondary">
+                    👁️ Förhandsgranska
+                </button>
+                <button onclick="printWorksheet()" class="editor-btn-primary">
+                    🖨️ Skriv ut / PDF
+                </button>
+            </div>
+        </div>
+        <div class="editor-content">
+            <!-- Tasks Panel -->
+            <div class="editor-tasks-panel">
+                <div class="editor-tasks-header">
+                    <h3>🔀 Ordna uppgifter</h3>
+                    <p class="editor-tasks-hint">Dra för att ändra ordning • Justera svarsrutans storlek för varje uppgift</p>
+                </div>
+                <div id="editorTasksList" class="editor-tasks-list">
+                    <!-- Tasks rendered here -->
+                </div>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div class="editor-settings-panel">
+                <div class="editor-settings-section">
+                    <h3 class="editor-settings-title">📋 Grundinställningar</h3>
+                    <div class="editor-settings-grid">
+                        <div class="editor-settings-full">
+                            <label class="editor-field-label">Titel på arbetsbladet</label>
+                            <input type="text" id="editorTitle" class="editor-input" placeholder="t.ex. Algebra övning 1">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="editor-settings-section">
+                    <h3 class="editor-settings-title">⚙️ Alternativ</h3>
+                    <div class="editor-checkbox-group">
+                        <label class="editor-checkbox-item">
+                            <input type="checkbox" id="editorIncludeAnswerKey" checked>
+                            ✅ Inkludera facit
+                        </label>
+                        <label class="editor-checkbox-item">
+                            <input type="checkbox" id="editorAnswerKeyOnBack">
+                            📄 Facit på baksida
+                        </label>
+                        <label class="editor-checkbox-item">
+                            <input type="checkbox" id="editorIncludeScaffolding">
+                            💡 Visa tips/stöd
+                        </label>
+                        <label class="editor-checkbox-item">
+                            <input type="checkbox" id="editorShuffleTasks">
+                            🔀 Slumpa ordning
+                        </label>
+                        <label class="editor-checkbox-item">
+                            <input type="checkbox" id="editorIncludeNameDate" checked>
+                            ✏️ Namn/Datum-fält
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="editor-actions">
+                    <button onclick="generateWorksheet()" class="editor-btn-primary">
+                        👁️ Förhandsgranska
+                    </button>
+                    <button onclick="printWorksheet()" class="editor-btn-secondary">
+                        🖨️ Skriv ut / PDF
+                    </button>
+                    <button onclick="clearAllSelectedTasks(); closeEditorView();" class="editor-btn-secondary" style="color: #ef4444;">
+                        🗑️ Rensa alla uppgifter
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -727,8 +1622,10 @@
         // State
         let currentCollection = 'campaigns';
         let allTasks = [];
-        // Global storage: Map of taskId -> { task data, source info }
+        // Global storage: Map of taskId -> { task data, source info, answerBoxHeight }
         let globalSelectedTasks = new Map();
+        // Ordered array of global keys for drag-and-drop ordering
+        let orderedTaskKeys = [];
         // Track which task IDs are selected in current view
         let currentViewSelectedIds = new Set();
 
@@ -894,15 +1791,44 @@
             }
         }
 
-        function getPreview(task) {
-            if (!task.question_sv) return 'Ingen uppgift';
-            if (Array.isArray(task.question_sv)) {
-                return task.question_sv.map(b => {
-                    if (b.type === 'math') return `\\(${b.value}\\)`;
-                    return b.value || '';
-                }).join(' ').substring(0, 100) + '...';
+        function getPreview(task, truncate = false) {
+            if (!task) return 'Ingen uppgift';
+            
+            // Try multiple common field names
+            let question = task.question_sv || task.question || task.text || task.content || task.title || task.name || '';
+            
+            // If still empty, try to get any string or array property
+            if (!question) {
+                for (const key of Object.keys(task)) {
+                    const val = task[key];
+                    if (typeof val === 'string' && val.length > 10 && key !== 'id' && key !== 'answer') {
+                        question = val;
+                        break;
+                    }
+                    if (Array.isArray(val) && val.length > 0 && val[0] && (val[0].value || val[0].text)) {
+                        question = val;
+                        break;
+                    }
+                }
             }
-            return String(task.question_sv).substring(0, 100) + '...';
+            
+            if (!question) return 'Uppgift ' + (task.id || '');
+            
+            if (Array.isArray(question)) {
+                const text = question.map(b => {
+                    if (!b) return '';
+                    if (typeof b === 'string') return b;
+                    if (b.type === 'math') return `\\(${b.value || ''}\\)`;
+                    if (b.type === 'image') return '[Bild]';
+                    return b.value || b.text || '';
+                }).join(' ').trim();
+                if (!text) return 'Uppgift ' + (task.id || '');
+                return truncate ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : text;
+            }
+            
+            const text = String(question).trim();
+            if (!text) return 'Uppgift ' + (task.id || '');
+            return truncate ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : text;
         }
 
         window.toggleTask = function(id) {
@@ -913,17 +1839,25 @@
             if (currentViewSelectedIds.has(id)) {
                 currentViewSelectedIds.delete(id);
                 globalSelectedTasks.delete(globalKey);
+                // Remove from ordered list
+                orderedTaskKeys = orderedTaskKeys.filter(k => k !== globalKey);
             } else {
                 currentViewSelectedIds.add(id);
                 globalSelectedTasks.set(globalKey, {
                     task: task,
                     sourceKey: sourceInfo.key,
-                    sourceLabel: sourceInfo.label
+                    sourceLabel: sourceInfo.label,
+                    answerType: 'box', // 'line', 'box', or 'none'
+                    answerBoxHeight: 40, // Default height in pixels for box
+                    linesCount: 3 // Default number of lines
                 });
+                // Add to end of ordered list
+                orderedTaskKeys.push(globalKey);
             }
             renderTaskList();
             updateSelectedCount();
             updateGlobalSummary();
+            renderSortableList();
         };
 
         window.toggleAllTasks = function() {
@@ -934,27 +1868,35 @@
                 allTasks.forEach(task => {
                     const globalKey = `${sourceInfo.key}|${task.id}`;
                     currentViewSelectedIds.add(task.id);
-                    globalSelectedTasks.set(globalKey, {
-                        task: task,
-                        sourceKey: sourceInfo.key,
-                        sourceLabel: sourceInfo.label
-                    });
+                    if (!globalSelectedTasks.has(globalKey)) {
+                        globalSelectedTasks.set(globalKey, {
+                            task: task,
+                            sourceKey: sourceInfo.key,
+                            sourceLabel: sourceInfo.label,
+                            answerType: 'box',
+                            answerBoxHeight: 40,
+                            linesCount: 3
+                        });
+                        orderedTaskKeys.push(globalKey);
+                    }
                 });
             } else {
                 allTasks.forEach(task => {
                     const globalKey = `${sourceInfo.key}|${task.id}`;
                     currentViewSelectedIds.delete(task.id);
                     globalSelectedTasks.delete(globalKey);
+                    orderedTaskKeys = orderedTaskKeys.filter(k => k !== globalKey);
                 });
             }
             renderTaskList();
             updateSelectedCount();
             updateGlobalSummary();
+            renderSortableList();
         };
 
         function updateSelectedCount() {
             const currentCount = currentViewSelectedIds.size;
-            document.getElementById('selectedCount').textContent = `${currentCount} valda här`;
+            document.getElementById('selectedCount').textContent = `${currentCount} valda`;
             document.getElementById('selectAllTasks').checked = allTasks.length > 0 && currentCount === allTasks.length;
         }
 
@@ -962,17 +1904,30 @@
             const summaryEl = document.getElementById('selectedTasksSummary');
             const totalEl = document.getElementById('totalSelectedCount');
             const infoEl = document.getElementById('totalSelectedInfo');
-            const breakdownEl = document.getElementById('selectedTasksBreakdown');
+            const badgeEl = document.getElementById('organizeBadge');
+            const continueBtn = document.getElementById('continueBtn');
+            const continueBtnCount = document.getElementById('continueBtnCount');
 
             const totalCount = globalSelectedTasks.size;
 
+            // Update continue button
+            if (continueBtn) {
+                continueBtn.disabled = totalCount === 0;
+                if (continueBtnCount) {
+                    continueBtnCount.textContent = totalCount > 0 ? `(${totalCount})` : '';
+                }
+            }
+
             if (totalCount === 0) {
                 summaryEl.classList.add('hidden');
+                summaryEl.style.display = 'none';
                 return;
             }
 
             summaryEl.classList.remove('hidden');
+            summaryEl.style.display = 'flex';
             totalEl.textContent = totalCount;
+            badgeEl.textContent = totalCount;
 
             // Group by source
             const bySource = new Map();
@@ -983,15 +1938,7 @@
                 bySource.get(sourceKey).count++;
             });
 
-            infoEl.textContent = `${totalCount} uppgifter från ${bySource.size} ${bySource.size === 1 ? 'område' : 'områden'}`;
-
-            breakdownEl.innerHTML = Array.from(bySource.entries()).map(([key, { label, count }]) => `
-                <div class="flex items-center gap-2 bg-[#333] px-3 py-1.5 rounded-full text-sm">
-                    <span class="text-gray-300">${label}</span>
-                    <span class="font-bold" style="color: var(--primary-orange);">${count}</span>
-                    <button onclick="removeSourceTasks('${key}')" class="text-gray-500 hover:text-red-400 transition ml-1" title="Ta bort dessa">✕</button>
-                </div>
-            `).join('');
+            infoEl.textContent = `uppgifter (${bySource.size} ${bySource.size === 1 ? 'område' : 'områden'})`;
         }
 
         window.removeSourceTasks = function(sourceKey) {
@@ -1001,7 +1948,10 @@
                     keysToRemove.push(key);
                 }
             });
-            keysToRemove.forEach(key => globalSelectedTasks.delete(key));
+            keysToRemove.forEach(key => {
+                globalSelectedTasks.delete(key);
+                orderedTaskKeys = orderedTaskKeys.filter(k => k !== key);
+            });
 
             // Update current view if we're in that source
             const currentSource = getCurrentSourceKey();
@@ -1012,15 +1962,144 @@
 
             updateSelectedCount();
             updateGlobalSummary();
+            renderSortableList();
         };
 
         window.clearAllSelectedTasks = function() {
             globalSelectedTasks.clear();
+            orderedTaskKeys = [];
             currentViewSelectedIds.clear();
             document.getElementById('selectAllTasks').checked = false;
             renderTaskList();
             updateSelectedCount();
             updateGlobalSummary();
+            renderSortableList();
+        };
+
+        // ============ DRAG AND DROP SORTABLE LIST ============
+        let draggedItem = null;
+        let draggedKey = null;
+        let isDragging = false;
+
+        function renderSortableList() {
+            const listEl = document.getElementById('sortableList');
+            const emptyEl = document.getElementById('emptyOrganize');
+            
+            if (orderedTaskKeys.length === 0) {
+                listEl.innerHTML = '';
+                emptyEl.classList.remove('hidden');
+                emptyEl.style.display = 'block';
+                return;
+            }
+            
+            emptyEl.classList.add('hidden');
+            emptyEl.style.display = 'none';
+            
+            // Simple preview list (no drag-and-drop here - that's in Editor View)
+            listEl.innerHTML = orderedTaskKeys.map((globalKey, idx) => {
+                const data = globalSelectedTasks.get(globalKey);
+                if (!data) return '';
+                
+                const task = data.task;
+                const preview = getPreview(task, true);
+                
+                return `
+                    <div class="sortable-item" style="cursor: default;">
+                        <div class="sortable-content" style="padding: 10px;">
+                            <div class="sortable-header">
+                                <span class="sortable-number">#${idx + 1}</span>
+                                <span class="sortable-source">${data.sourceLabel}</span>
+                            </div>
+                            <div class="sortable-preview">${preview}</div>
+                        </div>
+                        <button class="remove-task-btn" onclick="removeTaskFromOrdered('${globalKey}')" title="Ta bort">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([listEl]).catch(err => console.log('MathJax:', err));
+            }
+        }
+
+        window.handleDragStart = function(e, key) {
+            isDragging = true;
+            draggedKey = key;
+            draggedItem = document.querySelector(`.sortable-item[data-key="${key}"]`);
+            if (draggedItem) {
+                draggedItem.classList.add('dragging');
+            }
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+        };
+
+        window.handleDragEnd = function(e) {
+            isDragging = false;
+            document.querySelectorAll('.sortable-item').forEach(item => {
+                item.classList.remove('dragging', 'drag-over');
+            });
+            draggedItem = null;
+            draggedKey = null;
+        };
+
+        window.handleDragOver = function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const item = e.target.closest('.sortable-item');
+            if (item && item !== draggedItem) {
+                item.classList.add('drag-over');
+            }
+        };
+
+        window.handleDragLeave = function(e) {
+            e.target.closest('.sortable-item')?.classList.remove('drag-over');
+        };
+
+        window.handleDrop = function(e) {
+            e.preventDefault();
+            const targetItem = e.target.closest('.sortable-item');
+            if (!targetItem || !draggedKey) return;
+            
+            const targetKey = targetItem.dataset.key;
+            if (draggedKey === targetKey) return;
+            
+            // Reorder the array
+            const fromIdx = orderedTaskKeys.indexOf(draggedKey);
+            const toIdx = orderedTaskKeys.indexOf(targetKey);
+            
+            if (fromIdx !== -1 && toIdx !== -1) {
+                orderedTaskKeys.splice(fromIdx, 1);
+                orderedTaskKeys.splice(toIdx, 0, draggedKey);
+                renderSortableList();
+            }
+            
+            targetItem.classList.remove('drag-over');
+        };
+
+        window.updateAnswerSize = function(globalKey, value) {
+            const data = globalSelectedTasks.get(globalKey);
+            if (data) {
+                data.answerBoxHeight = parseInt(value);
+                globalSelectedTasks.set(globalKey, data);
+                const safeKey = globalKey.replace(/[|]/g, '_');
+                const sizeEl = document.getElementById(`size-${safeKey}`);
+                if (sizeEl) sizeEl.textContent = `${value}px`;
+            }
+        };
+
+        window.removeTaskFromOrdered = function(globalKey) {
+            globalSelectedTasks.delete(globalKey);
+            orderedTaskKeys = orderedTaskKeys.filter(k => k !== globalKey);
+            
+            // Update current view if this task is visible
+            const parts = globalKey.split('|');
+            const taskId = parts[parts.length - 1];
+            currentViewSelectedIds.delete(taskId);
+            
+            renderTaskList();
+            updateSelectedCount();
+            updateGlobalSummary();
+            renderSortableList();
         };
 
         window.generateWorksheet = function() {
@@ -1029,20 +2108,19 @@
                 return;
             }
 
-            const title = document.getElementById('worksheetTitle').value || 'Matematikövning';
-            const tasksPerPage = parseInt(document.getElementById('tasksPerPage').value);
-            const answerSpace = document.getElementById('answerSpace').value;
-            const includeAnswerKey = document.getElementById('includeAnswerKey').checked;
-            const answerKeyOnBack = document.getElementById('answerKeyOnBack').checked;
-            const includeScaffolding = document.getElementById('includeScaffolding').checked;
-            const shuffleTasks = document.getElementById('shuffleTasks').checked;
-            const includeNameDate = document.getElementById('includeNameDate').checked;
+            // Use editor settings (no longer includes answerSpace - it's per-task now)
+            const title = document.getElementById('editorTitle').value || 'Matematikövning';
+            const includeAnswerKey = document.getElementById('editorIncludeAnswerKey').checked;
+            const answerKeyOnBack = document.getElementById('editorAnswerKeyOnBack').checked;
+            const includeScaffolding = document.getElementById('editorIncludeScaffolding').checked;
+            const shuffleTasks = document.getElementById('editorShuffleTasks').checked;
+            const includeNameDate = document.getElementById('editorIncludeNameDate').checked;
 
-            // Collect all tasks from global selection
-            let tasks = Array.from(globalSelectedTasks.values()).map(item => item.task);
-            if (shuffleTasks) tasks = shuffle([...tasks]);
+            // Collect all tasks from ordered list (respects drag-and-drop order)
+            let taskDataList = orderedTaskKeys.map(key => globalSelectedTasks.get(key)).filter(Boolean);
+            if (shuffleTasks) taskDataList = shuffle([...taskDataList]);
 
-            const html = buildWorksheet(tasks, { title, tasksPerPage, answerSpace, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate });
+            const html = buildWorksheet(taskDataList, { title, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate });
             document.getElementById('worksheetPreviewContent').innerHTML = html;
             document.getElementById('worksheetModal').classList.remove('hidden');
 
@@ -1051,66 +2129,71 @@
             }
         };
 
-        function buildWorksheet(tasks, opts) {
-            const { title, tasksPerPage, answerSpace, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate } = opts;
+        function buildWorksheet(taskDataList, opts) {
+            const { title, includeAnswerKey, answerKeyOnBack, includeScaffolding, includeNameDate } = opts;
             let html = '';
             let answers = [];
-            const pages = [];
-            for (let i = 0; i < tasks.length; i += tasksPerPage) {
-                pages.push(tasks.slice(i, i + tasksPerPage));
-            }
-
-            pages.forEach((pageTasks, pageIdx) => {
-                html += `<div class="worksheet-page">`;
-                if (pageIdx === 0) {
-                    html += `
-                        <div class="worksheet-header">
-                            <div class="worksheet-title">${escapeHtml(title)}</div>
-                            ${includeNameDate ? `
-                                <div class="worksheet-name-date">
-                                    <label>Namn: <span class="line"></span></label>
-                                    <label>Datum: <span class="line"></span></label>
-                                </div>
-                            ` : ''}
+            
+            // All tasks on a single continuous page (no tasksPerPage split)
+            html += `<div class="worksheet-page">`;
+            html += `
+                <div class="worksheet-header">
+                    <div class="worksheet-title">${escapeHtml(title)}</div>
+                    ${includeNameDate ? `
+                        <div class="worksheet-name-date">
+                            <label>Namn: <span class="line"></span></label>
+                            <label>Datum: <span class="line"></span></label>
                         </div>
-                    `;
-                } else {
-                    html += `<div style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">${escapeHtml(title)} - Sida ${pageIdx + 1}</div>`;
-                }
+                    ` : ''}
+                </div>
+            `;
 
-                pageTasks.forEach((task, idx) => {
-                    const num = pageIdx * tasksPerPage + idx + 1;
-                    answers.push({ num, answer: task.answer || '?' });
+            taskDataList.forEach((taskData, idx) => {
+                const task = taskData.task;
+                const answerType = taskData.answerType || 'box';
+                const boxHeight = taskData.answerBoxHeight || 40;
+                const linesCount = taskData.linesCount || 3;
+                const num = idx + 1;
+                answers.push({ num, answer: task.answer || '?' });
 
-                    html += `<div class="worksheet-task">`;
-                    html += `<div class="worksheet-task-number">Uppgift ${num}</div>`;
-                    html += `<div class="worksheet-task-content">${renderContent(task.question_sv)}</div>`;
+                html += `<div class="worksheet-task">`;
+                html += `<div class="worksheet-task-number">Uppgift ${num}</div>`;
+                html += `<div class="worksheet-task-content">${renderContent(task.question_sv)}</div>`;
 
-                    if (includeScaffolding && task.scaffolding_sv && task.scaffolding_sv.length > 0) {
-                        html += `<div class="worksheet-scaffolding">`;
-                        html += `<div class="worksheet-scaffolding-title">💡 Tips:</div>`;
-                        if (Array.isArray(task.scaffolding_sv)) {
-                            html += `<div class="worksheet-scaffolding-list">`;
-                            task.scaffolding_sv.forEach((s, i) => {
-                                html += `<div class="worksheet-scaffolding-item">${i + 1}. ${formatMath(s.value || s)}</div>`;
-                            });
-                            html += `</div>`;
-                        }
+                if (includeScaffolding && task.scaffolding_sv && task.scaffolding_sv.length > 0) {
+                    html += `<div class="worksheet-scaffolding">`;
+                    html += `<div class="worksheet-scaffolding-title">💡 Tips:</div>`;
+                    if (Array.isArray(task.scaffolding_sv)) {
+                        html += `<div class="worksheet-scaffolding-list">`;
+                        task.scaffolding_sv.forEach((s, i) => {
+                            html += `<div class="worksheet-scaffolding-item">${i + 1}. ${formatMath(s.value || s)}</div>`;
+                        });
                         html += `</div>`;
                     }
-
-                    if (answerSpace === 'line') html += `<div class="worksheet-answer-line"></div>`;
-                    else if (answerSpace === 'box') html += `<div class="worksheet-answer-box"></div>`;
-
                     html += `</div>`;
-                });
-
-                if (includeAnswerKey && !answerKeyOnBack && pageIdx === pages.length - 1) {
-                    html += buildAnswerKey(answers);
                 }
+
+                // Use individual answer type and settings
+                if (answerType === 'line') {
+                    // Render multiple lines based on linesCount
+                    html += `<div class="worksheet-answer-lines">`;
+                    for (let i = 0; i < linesCount; i++) {
+                        html += `<div class="worksheet-answer-line"></div>`;
+                    }
+                    html += `</div>`;
+                } else if (answerType === 'box') {
+                    html += `<div class="worksheet-answer-box" style="height: ${boxHeight}px;"></div>`;
+                }
+                // If answerType === 'none', no answer space is rendered
 
                 html += `</div>`;
             });
+
+            if (includeAnswerKey && !answerKeyOnBack) {
+                html += buildAnswerKey(answers);
+            }
+
+            html += `</div>`;
 
             if (includeAnswerKey && answerKeyOnBack) {
                 html += `
@@ -1233,6 +2316,240 @@
                 window.print();
                 setTimeout(() => { printArea.style.display = 'none'; }, 1000);
             }
+        };
+
+        // ============ EDITOR VIEW FUNCTIONS ============
+        
+        window.openEditorView = function() {
+            if (globalSelectedTasks.size === 0) {
+                alert('⚠️ Välj minst en uppgift först!');
+                return;
+            }
+            
+            // Close any open preview modal first
+            document.getElementById('worksheetModal').classList.add('hidden');
+            
+            document.getElementById('editorView').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            renderEditorTasksList();
+            updateEditorTaskCount();
+        };
+        
+        window.closeEditorView = function() {
+            // Close any open preview modal first
+            document.getElementById('worksheetModal').classList.add('hidden');
+            
+            document.getElementById('editorView').classList.add('hidden');
+            document.body.style.overflow = '';
+            
+            // Update main view
+            updateGlobalSummary();
+            renderSortableList();
+            renderTaskList();
+        };
+        
+        function updateEditorTaskCount() {
+            const count = globalSelectedTasks.size;
+            document.getElementById('editorTaskCount').textContent = `${count} uppgift${count !== 1 ? 'er' : ''}`;
+        }
+        
+        let editorDraggedKey = null;
+        let editorDraggedItem = null;
+        
+        function renderEditorTasksList() {
+            const listEl = document.getElementById('editorTasksList');
+            
+            if (orderedTaskKeys.length === 0) {
+                listEl.innerHTML = `
+                    <div class="editor-empty">
+                        <div class="editor-empty-icon">📝</div>
+                        <h3>Inga uppgifter valda</h3>
+                        <p>Gå tillbaka och välj uppgifter från listan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = orderedTaskKeys.map((globalKey, idx) => {
+                const data = globalSelectedTasks.get(globalKey);
+                if (!data) return '';
+                
+                const task = data.task;
+                let preview = getPreview(task, false);
+                
+                // Debug: log task structure if preview is empty
+                if (preview === 'Ingen uppgift' && task) {
+                    console.log('Task structure for empty preview:', task);
+                    if (task.title) preview = task.title;
+                    else if (task.name) preview = task.name;
+                    else if (task.content) preview = typeof task.content === 'string' ? task.content : JSON.stringify(task.content);
+                }
+                
+                const answerType = data.answerType || 'box';
+                const height = data.answerBoxHeight || 40;
+                const linesCount = data.linesCount || 3;
+                const safeKey = globalKey.replace(/[|]/g, '_');
+                
+                const showBoxSlider = answerType === 'box';
+                const showLineSlider = answerType === 'line';
+                
+                return `
+                    <div class="editor-task-item" 
+                         data-key="${globalKey}"
+                         draggable="true"
+                         ondragstart="handleEditorDragStart(event, '${globalKey}')"
+                         ondragend="handleEditorDragEnd(event)"
+                         ondragover="handleEditorDragOver(event)"
+                         ondragleave="handleEditorDragLeave(event)"
+                         ondrop="handleEditorDrop(event)">
+                        <div class="editor-drag-handle">⋮⋮</div>
+                        <div class="editor-task-content">
+                            <div class="editor-task-header">
+                                <span class="editor-task-number">#${idx + 1}</span>
+                                <span class="editor-task-source">${data.sourceLabel || 'Okänd källa'}</span>
+                            </div>
+                            <div class="editor-task-preview">${preview || 'Ingen uppgiftstext tillgänglig'}</div>
+                            <div class="editor-answer-type" onclick="event.stopPropagation()">
+                                <button class="answer-type-btn ${answerType === 'line' ? 'active' : ''}" 
+                                        onclick="setAnswerType('${globalKey}', 'line')">📝 Linje</button>
+                                <button class="answer-type-btn ${answerType === 'box' ? 'active' : ''}" 
+                                        onclick="setAnswerType('${globalKey}', 'box')">📦 Ruta</button>
+                                <button class="answer-type-btn ${answerType === 'none' ? 'active' : ''}" 
+                                        onclick="setAnswerType('${globalKey}', 'none')">❌ Inget</button>
+                            </div>
+                            <div class="editor-size-control ${showBoxSlider ? '' : 'hidden'}" id="box-control-${safeKey}" onclick="event.stopPropagation()">
+                                <span class="editor-size-label">📏 Rutans höjd:</span>
+                                <input type="range" class="editor-size-slider" 
+                                       min="20" max="150" value="${height}"
+                                       draggable="false"
+                                       onmousedown="event.stopPropagation()"
+                                       ontouchstart="event.stopPropagation()"
+                                       ondragstart="event.preventDefault(); event.stopPropagation(); return false;"
+                                       oninput="updateAnswerSizeEditor('${globalKey}', this.value)"
+                                       onchange="updateAnswerSizeEditor('${globalKey}', this.value)">
+                                <span class="editor-size-value" id="editor-size-${safeKey}">${height}px</span>
+                            </div>
+                            <div class="editor-size-control ${showLineSlider ? '' : 'hidden'}" id="line-control-${safeKey}" onclick="event.stopPropagation()">
+                                <span class="editor-size-label">📏 Antal rader:</span>
+                                <input type="range" class="editor-size-slider" 
+                                       min="1" max="10" value="${linesCount}"
+                                       draggable="false"
+                                       onmousedown="event.stopPropagation()"
+                                       ontouchstart="event.stopPropagation()"
+                                       ondragstart="event.preventDefault(); event.stopPropagation(); return false;"
+                                       oninput="updateLinesCountEditor('${globalKey}', this.value)"
+                                       onchange="updateLinesCountEditor('${globalKey}', this.value)">
+                                <span class="editor-size-value" id="editor-lines-${safeKey}">${linesCount} rader</span>
+                            </div>
+                        </div>
+                        <button class="editor-remove-btn" onclick="event.stopPropagation(); removeTaskFromEditor('${globalKey}')" title="Ta bort">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([listEl]).catch(err => console.log('MathJax:', err));
+            }
+        }
+        
+        window.setAnswerType = function(globalKey, type) {
+            const data = globalSelectedTasks.get(globalKey);
+            if (data) {
+                data.answerType = type;
+                globalSelectedTasks.set(globalKey, data);
+                renderEditorTasksList();
+            }
+        };
+        
+        window.updateAnswerSizeEditor = function(globalKey, value) {
+            const data = globalSelectedTasks.get(globalKey);
+            if (data) {
+                data.answerBoxHeight = parseInt(value);
+                globalSelectedTasks.set(globalKey, data);
+                const safeKey = globalKey.replace(/[|]/g, '_');
+                const sizeEl = document.getElementById(`editor-size-${safeKey}`);
+                if (sizeEl) sizeEl.textContent = `${value}px`;
+            }
+        };
+        
+        window.updateLinesCountEditor = function(globalKey, value) {
+            const data = globalSelectedTasks.get(globalKey);
+            if (data) {
+                data.linesCount = parseInt(value);
+                globalSelectedTasks.set(globalKey, data);
+                const safeKey = globalKey.replace(/[|]/g, '_');
+                const linesEl = document.getElementById(`editor-lines-${safeKey}`);
+                if (linesEl) linesEl.textContent = `${value} rader`;
+            }
+        };
+        
+        window.removeTaskFromEditor = function(globalKey) {
+            globalSelectedTasks.delete(globalKey);
+            orderedTaskKeys = orderedTaskKeys.filter(k => k !== globalKey);
+            
+            // Update current view if this task is visible
+            const parts = globalKey.split('|');
+            const taskId = parts[parts.length - 1];
+            currentViewSelectedIds.delete(taskId);
+            
+            renderEditorTasksList();
+            updateEditorTaskCount();
+            
+            // Close editor if no tasks left
+            if (globalSelectedTasks.size === 0) {
+                closeEditorView();
+            }
+        };
+        
+        window.handleEditorDragStart = function(e, key) {
+            editorDraggedKey = key;
+            editorDraggedItem = e.currentTarget;
+            editorDraggedItem.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', key);
+        };
+        
+        window.handleEditorDragEnd = function(e) {
+            document.querySelectorAll('.editor-task-item').forEach(item => {
+                item.classList.remove('dragging', 'drag-over');
+            });
+            editorDraggedItem = null;
+            editorDraggedKey = null;
+        };
+        
+        window.handleEditorDragOver = function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            const item = e.currentTarget;
+            if (item && item !== editorDraggedItem) {
+                item.classList.add('drag-over');
+            }
+        };
+        
+        window.handleEditorDragLeave = function(e) {
+            e.currentTarget.classList.remove('drag-over');
+        };
+        
+        window.handleEditorDrop = function(e) {
+            e.preventDefault();
+            const targetItem = e.currentTarget;
+            if (!targetItem || !editorDraggedKey) return;
+            
+            const targetKey = targetItem.dataset.key;
+            if (editorDraggedKey === targetKey) return;
+            
+            // Reorder the array
+            const fromIdx = orderedTaskKeys.indexOf(editorDraggedKey);
+            const toIdx = orderedTaskKeys.indexOf(targetKey);
+            
+            if (fromIdx !== -1 && toIdx !== -1) {
+                orderedTaskKeys.splice(fromIdx, 1);
+                orderedTaskKeys.splice(toIdx, 0, editorDraggedKey);
+                renderEditorTasksList();
+            }
+            
+            targetItem.classList.remove('drag-over');
         };
     </script>
 </body>
