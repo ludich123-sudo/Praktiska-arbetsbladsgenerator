@@ -1560,9 +1560,20 @@
                 parts: [
                     { id: 'anvandaformler', name: 'Använda formler f(x)' },
                     { id: 'ratalinjen', name: 'Den räta linjen' },
+                    { id: 'koordinatsystem', name: 'Koordinatsystem' },
                     { id: 'procentuell', name: 'Procentuell förändring' },
                     { id: 'jamfortolka', name: 'Jämföra och tolka' },
                     { id: 'funktionerblandade', name: 'Blandade uppgifter' }
+                ]
+            },
+            Statistik: {
+                name: 'Statistik',
+                yearLevel: 'Ma 1',
+                parts: [
+                    { id: 'lagesmatt', name: 'Lägesmått och variationsbredd' },
+                    { id: 'diagramtolkning', name: 'Diagram och tolkning' },
+                    { id: 'begreppsamhallet', name: 'Begrepp i samhället' },
+                    { id: 'kritiskttankande', name: 'Kritiskt tänkande' }
                 ]
             }
         };
@@ -2253,11 +2264,19 @@
                     if (!b) return '';
                     if (b.type === 'math') return `<div style="text-align:center;margin:10px 0;">$$${b.value}$$</div>`;
                     if (b.type === 'text') return `<p>${formatMath(b.value || '')}</p>`;
-                    if (b.type === 'image' && b.value) return `<img src="${b.value}" alt="Bild" style="max-width:100%;max-height:200px;margin:10px 0;">`;
+                    if (b.type === 'image' && b.value) {
+                        // Properly render images (graphs, diagrams, etc.)
+                        return `<div style="text-align:center;margin:15px 0;"><img src="${b.value}" alt="Bild" style="max-width:100%;max-height:250px;border:1px solid #e5e7eb;border-radius:8px;"></div>`;
+                    }
                     return `<p>${formatMath(b.value || '')}</p>`;
                 }).join('');
             }
-            return `<p>${formatMath(String(q))}</p>`;
+            // Handle legacy string format - check if it contains image data
+            const str = String(q);
+            if (str.startsWith('data:image')) {
+                return `<div style="text-align:center;margin:15px 0;"><img src="${str}" alt="Bild" style="max-width:100%;max-height:250px;border:1px solid #e5e7eb;border-radius:8px;"></div>`;
+            }
+            return `<p>${formatMath(str)}</p>`;
         }
 
         function formatMath(text) {
